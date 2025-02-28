@@ -7,6 +7,9 @@ pr:
 pool:
   vmImage: 'ubuntu-latest'  # Máquina virtual para ejecutar el pipeline
 
+variables:
+- group: varcody  # Grupo de variables con credenciales de JFrog
+
 steps:
 - checkout: self  # Clona el repositorio de GitHub en la máquina virtual
 
