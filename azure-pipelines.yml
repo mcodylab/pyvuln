@@ -10,9 +10,12 @@ pool:
 steps:
 - checkout: self  # Clona el repositorio de GitHub en la máquina virtual
 
-- task: UseNode@2  # Instala Node.js (necesario para Snyk)
-  inputs:
-    version: '20.x'
+- script: |
+    echo "Instalando Node.js..."
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    apt-get install -y nodejs
+    node -v  # Verifica la instalación
+  displayName: 'Instalar Node.js'
 
 - script: |
     echo "Instalando Snyk..."
