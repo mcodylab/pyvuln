@@ -1,0 +1,31 @@
+trigger:
+- main  # Se ejecuta en cada cambio en main
+
+pr:
+- main  # También se ejecuta en cada Pull Request a main
+
+pool:
+  vmImage: 'ubuntu-latest'  # Máquina virtual para ejecutar el pipeline
+
+steps:
+- checkout: self  # Clona el repositorio de GitHub en la máquina virtual
+
+- task: UseNode@2  # Instala Node.js (necesario para Snyk)
+  inputs:
+    version: '20.x'
+
+- script: |
+    echo "Instalando Snyk..."
+    npm install -g snyk  # Instala Snyk CLI
+
+    echo "Autenticando con Snyk..."
+    snyk auth $(SNYK_TOKEN)  # Usa el token secreto
+
+    echo "Ejecutando escaneo de seguridad..."
+    snyk test --severity-threshold=high  # Falla si encuentra vulnerabilidades críticas
+  displayName: 'Run Snyk Security Scan'
+
+- script: |
+    echo "Enviando reporte a Snyk Dashboard..."
+    snyk monitor  # Guarda el reporte en app.snyk.io para seguimiento
+  displayName: 'Upload results to Snyk'
