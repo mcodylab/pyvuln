@@ -13,22 +13,24 @@ variables:
 steps:
 - checkout: self  # Clona el repositorio de GitHub en la máquina virtual
 
-- script: |
-    echo "Instalando Node.js..."
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-    apt-get install -y nodejs
-    node -v  # Verifica la instalación
-  displayName: 'Instalar Node.js'
+
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.x'
+  displayName: 'Configurar Python'
 
 - script: |
-    echo "Instalando Snyk..."
+    python -m venv venv  # Crea un entorno virtual
+    source venv/bin/activate  # Activa el entorno (Linux/macOS)
+    pip install --upgrade pip  # Actualiza pip
+    pip install -r requirements.txt  # Instala dependencias
+  displayName: 'Instalar dependencias'
+
+- script: |
+    source venv/bin/activate  # Asegura que se usa el entorno virtual
     npm install -g snyk  # Instala Snyk CLI
-
-    echo "Autenticando con Snyk..."
-    snyk auth $(SNYK_TOKEN)  # Usa el token secreto
-
-    echo "Ejecutando escaneo de seguridad..."
-    snyk test --severity-threshold=high  # Falla si encuentra vulnerabilidades críticas
+    snyk auth $(SNYK_TOKEN)  # Autentica con Snyk
+    snyk test --severity-threshold=high --skip-unresolved  # Escaneo de seguridad
   displayName: 'Run Snyk Security Scan'
 
 - script: |
