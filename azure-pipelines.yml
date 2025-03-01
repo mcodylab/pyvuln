@@ -18,6 +18,10 @@ steps:
   inputs:
     versionSpec: '3.x'
   displayName: 'Configurar Python'
+  
+- script: |
+    python -c "import sqlite3; print('SQLite está disponible')"
+  displayName: 'Verificar SQLite'
 
 - script: |
     python -m venv venv  # Crea un entorno virtual
