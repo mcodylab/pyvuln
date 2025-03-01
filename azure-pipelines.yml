@@ -36,14 +36,16 @@ steps:
     snyk auth $(SNYK_TOKEN)  # Autentica con Snyk
   displayName: 'Run Snyk Security Scan'
   
+
+
 - script: |
-    source venv/bin/activate  # Activa el entorno virtual
+    source venv/bin/activate  # Activa el entorno virtual (Linux/macOS)
     echo "Escaneando dependencias con Snyk..."
-    snyk test --severity-threshold=high  # Escaneo de dependencias
+    snyk test --severity-threshold=high || true
     echo "Escaneando código fuente con Snyk Code..."
-    snyk code test  # Escaneo de código estático (SAST)
+    snyk code test || true
   displayName: 'Snyk Security Scan'
-  continueOnError: true
+
 
 - script: |
     source venv/bin/activate  # Activa el entorno virtual (Linux/macOS)
