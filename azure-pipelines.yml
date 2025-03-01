@@ -45,7 +45,7 @@ steps:
     echo "Escaneando dependencias con Snyk..."
     snyk test --all-projects --severity-threshold=high || true
     echo "Escaneando código fuente con Snyk Code..."
-    snyk code test || true
+    snyk code test --debug || true
     echo "Escaneando Dockerfile..."
     snyk container test --file=Dockerfile || true
     echo "Enviando reporte a Snyk Dashboard..."
