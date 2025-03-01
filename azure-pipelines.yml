@@ -41,6 +41,7 @@ steps:
 - script: |
     source venv/bin/activate
     snyk auth $(SNYK_TOKEN)
+    snyk config get org
     echo "Escaneando dependencias con Snyk..."
     snyk test --all-projects --severity-threshold=high || true
     echo "Escaneando código fuente con Snyk Code..."
