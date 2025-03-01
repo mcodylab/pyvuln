@@ -49,5 +49,5 @@ steps:
     echo "Escaneando Dockerfile..."
     snyk container test --file=Dockerfile || true
     echo "Enviando reporte a Snyk Dashboard..."
-    snyk monitor --project-name="mcodylab/pyvuln"
+    snyk monitor --project-name="mi-proyecto-$(Build.BuildId)"
   displayName: 'Snyk Security Scan'
