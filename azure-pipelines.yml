@@ -34,8 +34,15 @@ steps:
     source venv/bin/activate  # Asegura que se usa el entorno virtual
     npm install -g snyk  # Instala Snyk CLI
     snyk auth $(SNYK_TOKEN)  # Autentica con Snyk
-    snyk test --severity-threshold=high --skip-unresolved  # Escaneo de seguridad
   displayName: 'Run Snyk Security Scan'
+  
+- script: |
+    source venv/bin/activate  # Activa el entorno virtual
+    echo "Escaneando dependencias con Snyk..."
+    snyk test --severity-threshold=high  # Escaneo de dependencias
+    echo "Escaneando código fuente con Snyk Code..."
+    snyk code test  # Escaneo de código estático (SAST)
+  displayName: 'Snyk Security Scan'
 
 - script: |
     source venv/bin/activate  # Activa el entorno virtual (Linux/macOS)
