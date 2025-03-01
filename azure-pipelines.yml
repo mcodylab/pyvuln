@@ -22,8 +22,8 @@ steps:
 - script: |
     python -m venv venv  # Crea un entorno virtual
     source venv/bin/activate  # Activa el entorno (Linux/macOS)
-    pip install --upgrade pip  # Actualiza pip
-    pip install -r requirements.txt  # Instala dependencias
+    pip install --no-cache-dir --index-url https://pypi.org/simple --upgrade pip  # Actualiza pip
+    pip install --no-cache-dir --index-url $(ARTIFACTORY_URL) -r requirements.txt  # Instala dependencias
   displayName: 'Instalar dependencias'
 
 - script: |
