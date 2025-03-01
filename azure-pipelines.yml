@@ -45,9 +45,9 @@ steps:
     echo "Escaneando dependencias con Snyk..."
     snyk test --all-projects --severity-threshold=high || true
     echo "Escaneando código fuente con Snyk Code..."
-    snyk code test --org=4c1ee31d-3158-4a30-ae75-b754fa29b29f || true
+    snyk code test || true
     echo "Escaneando Dockerfile..."
     snyk container test --file=Dockerfile || true
     echo "Enviando reporte a Snyk Dashboard..."
-    snyk monitor
+    snyk monitor --project-name="mcodylab/pyvuln"
   displayName: 'Snyk Security Scan'
