@@ -38,6 +38,7 @@ steps:
   displayName: 'Run Snyk Security Scan'
 
 - script: |
+    source venv/bin/activate  # Activa el entorno virtual (Linux/macOS)
     echo "Enviando reporte a Snyk Dashboard..."
     snyk monitor  # Guarda el reporte en app.snyk.io para seguimiento
   displayName: 'Upload results to Snyk'
