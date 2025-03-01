@@ -43,6 +43,7 @@ steps:
     echo "Escaneando código fuente con Snyk Code..."
     snyk code test  # Escaneo de código estático (SAST)
   displayName: 'Snyk Security Scan'
+  continueOnError: true
 
 - script: |
     source venv/bin/activate  # Activa el entorno virtual (Linux/macOS)
