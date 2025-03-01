@@ -39,12 +39,14 @@ steps:
 
 
 - script: |
-    source venv/bin/activate  # Activa el entorno virtual (Linux/macOS)
+    source venv/bin/activate
+    snyk auth $(SNYK_TOKEN)
     echo "Escaneando dependencias con Snyk..."
-    snyk test --severity-threshold=high || true
+    snyk test --all-projects --severity-threshold=high || true
     echo "Escaneando código fuente con Snyk Code..."
     snyk code test || true
+    echo "Escaneando Dockerfile..."
+    snyk container test --file=Dockerfile || true
     echo "Enviando reporte a Snyk Dashboard..."
-    snyk auth $(SNYK_TOKEN)
-    snyk monitor  # Guarda el reporte en app.snyk.io
+    snyk monitor
   displayName: 'Snyk Security Scan'
