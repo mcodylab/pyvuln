@@ -45,5 +45,6 @@ steps:
     echo "Escaneando código fuente con Snyk Code..."
     snyk code test || true
     echo "Enviando reporte a Snyk Dashboard..."
+    snyk auth $(SNYK_TOKEN)
     snyk monitor  # Guarda el reporte en app.snyk.io
   displayName: 'Snyk Security Scan'
