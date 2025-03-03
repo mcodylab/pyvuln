@@ -24,17 +24,18 @@ steps:
       testType: 'app'
       monitorWhen: 'never'  # Deshabilita `snyk monitor` aquí para evitar el error
       failOnIssues: false
-      additionalArguments: '--json-file-output=$(Build.ArtifactStagingDirectory)/snyk-report.json'
+      additionalArguments: '--json-file-output=$(Build.SourcesDirectory)/snyk-report.json'
 
   - script: |
-      echo "📂 Listando archivos en $(Build.ArtifactStagingDirectory):"
-      ls -lh $(Build.ArtifactStagingDirectory)
+      echo "📂 Listando archivos en $(Build.SourcesDirectory):"
+      ls -lh $(Build.SourcesDirectory)
 
       echo "📄 Mostrando contenido de snyk-report.json:"
-      cat $(Build.ArtifactStagingDirectory)/snyk-report.json
+      cat $(Build.SourcesDirectory)/snyk-report.json || echo "⚠️ No se encontró snyk-report.json"
+
     displayName: '🔍 Verificar reporte JSON'
 
   - task: PublishPipelineArtifact@1
     inputs:
-      targetPath: '$(Build.ArtifactStagingDirectory)/snyk-report.json'
+      targetPath: '$(Build.SourcesDirectory)/snyk-report.json'                                                                                                                                                                          
       artifactName: 'snyk-security-report'
