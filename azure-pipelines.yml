@@ -25,6 +25,10 @@ steps:
       monitorWhen: 'never'  # Deshabilita `snyk monitor` aquí para evitar el error
       failOnIssues: false
       additionalArguments: '--json-file-output=$(Build.SourcesDirectory)/snyk-report.json'
+  
+  - script: |
+      snyk test --json > $(Build.SourcesDirectory)/snyk-report.json
+    displayName: 'Forzar salida JSON'
 
   - script: |
       echo "📂 Listando archivos en $(Build.SourcesDirectory):"
