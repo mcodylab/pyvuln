@@ -25,3 +25,8 @@ steps:
       monitorWhen: 'always'
       failOnIssues: false  # Cambia a 'true' si quieres que el pipeline falle en caso de vulnerabilidades críticas
 
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: 'snyk-report.json'
+      artifactName: 'snyk-security-report'
+
