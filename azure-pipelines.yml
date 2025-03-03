@@ -21,16 +21,15 @@ steps:
   - task: SnykSecurityScan@1
     inputs:
       serviceConnectionEndpoint: 'snykcon'
-      testType: 'app'  # O 'container' si es un análisis de imágenes
-      monitorWhen: 'always'
-      failOnIssues: false  # Cambia a 'true' si quieres que el pipeline falle en caso de vulnerabilidades críticas
-      additionalArguments: '--json-file-output=snyk-report.json'
+      testType: 'app'
+      monitorWhen: 'never'  # Deshabilita `snyk monitor` aquí para evitar el error
+      failOnIssues: false
+      additionalArguments: '--json-file-output=$(Build.ArtifactStagingDirectory)/snyk-report.json'
 
-  - script: ls -l
+  - script: ls -l $(Build.ArtifactStagingDirectory)
     displayName: 'Verificar archivos generados'
 
   - task: PublishPipelineArtifact@1
     inputs:
-      targetPath: 'snyk-report.json'
+      targetPath: '$(Build.ArtifactStagingDirectory)/snyk-report.json'
       artifactName: 'snyk-security-report'
-
