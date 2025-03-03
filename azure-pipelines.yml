@@ -11,6 +11,13 @@ variables:
 - group: varcody  # Grupo de variables con credenciales de JFrog
 
 steps:
+
+  - script: |
+    
+     pip install --no-cache-dir --index-url https://pypi.org/simple --upgrade pip  # Actualiza pip
+     pip install --no-cache-dir --index-url https://pypi.org/simple  -r requirements.txt  # Instala dependencias
+    displayName: 'Instalar dependencias'
+
   - task: SnykSecurityScan@1
     inputs:
       serviceConnectionEndpoint: 'snykcon'
