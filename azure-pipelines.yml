@@ -26,13 +26,15 @@ steps:
       failOnIssues: false
       additionalArguments: '--json-file-output=$(Build.ArtifactStagingDirectory)/snyk-report.json'
 
-  - script: ls -l $(Build.ArtifactStagingDirectory)
-    displayName: 'Verificar archivos generados'
-  
-  - script: mv /home/vsts/work/_temp/*.html $(Build.ArtifactStagingDirectory)/
-    displayName: 'Mover reporte HTML a staging'
+  - script: |
+      echo "📂 Listando archivos en $(Build.ArtifactStagingDirectory):"
+      ls -lh $(Build.ArtifactStagingDirectory)
+
+      echo "📄 Mostrando contenido de snyk-report.json:"
+      cat $(Build.ArtifactStagingDirectory)/snyk-report.json
+    displayName: '🔍 Verificar reporte JSON'
 
   - task: PublishPipelineArtifact@1
     inputs:
-      targetPath: '$(Build.ArtifactStagingDirectory)/'
-      artifactName: 'snyk-html-report'
+      targetPath: '$(Build.ArtifactStagingDirectory)/snyk-report.json'
+      artifactName: 'snyk-security-report'
