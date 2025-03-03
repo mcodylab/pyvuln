@@ -28,8 +28,11 @@ steps:
 
   - script: ls -l $(Build.ArtifactStagingDirectory)
     displayName: 'Verificar archivos generados'
+  
+  - script: mv /home/vsts/work/_temp/*.html $(Build.ArtifactStagingDirectory)/
+    displayName: 'Mover reporte HTML a staging'
 
   - task: PublishPipelineArtifact@1
     inputs:
-      targetPath: '$(Build.ArtifactStagingDirectory)/snyk-report.json'
-      artifactName: 'snyk-security-report'
+      targetPath: '$(Build.ArtifactStagingDirectory)/'
+      artifactName: 'snyk-html-report'
