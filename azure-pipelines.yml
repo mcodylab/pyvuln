@@ -11,43 +11,10 @@ variables:
 - group: varcody  # Grupo de variables con credenciales de JFrog
 
 steps:
-- checkout: self  # Clona el repositorio de GitHub en la máquina virtual
+  - task: SnykSecurityScan@1
+    inputs:
+      serviceConnectionEndpoint: 'snykcon'
+      testType: 'app'  # O 'container' si es un análisis de imágenes
+      monitorWhen: 'always'
+      failOnIssues: false  # Cambia a 'true' si quieres que el pipeline falle en caso de vulnerabilidades críticas
 
-
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '3.x'
-  displayName: 'Configurar Python'
-  
-- script: |
-    python -c "import sqlite3; print('SQLite está disponible')"
-  displayName: 'Verificar SQLite'
-
-- script: |
-    python -m venv venv  # Crea un entorno virtual
-    source venv/bin/activate  # Activa el entorno (Linux/macOS)
-    pip install --no-cache-dir --index-url https://pypi.org/simple --upgrade pip  # Actualiza pip
-    pip install --no-cache-dir --index-url https://pypi.org/simple  -r requirements.txt  # Instala dependencias
-  displayName: 'Instalar dependencias'
-
-- script: |
-    source venv/bin/activate  # Asegura que se usa el entorno virtual
-    npm install -g snyk  # Instala Snyk CLI
-    snyk auth $(SNYK_TOKEN)  # Autentica con Snyk
-  displayName: 'Run Snyk Security Scan'
-  
-
-
-- script: |
-    source venv/bin/activate
-    snyk auth $(SNYK_TOKEN)
-    snyk config get org
-    echo "Escaneando dependencias con Snyk..."
-    snyk test --all-projects --severity-threshold=high || true
-    echo "Escaneando código fuente con Snyk Code..."
-    snyk code test --debug || true
-    echo "Escaneando Dockerfile..."
-    snyk container test --file=Dockerfile || true
-    echo "Enviando reporte a Snyk Dashboard..."
-    snyk monitor --project-name="mi-proyecto-$(Build.BuildId)"
-  displayName: 'Snyk Security Scan'
