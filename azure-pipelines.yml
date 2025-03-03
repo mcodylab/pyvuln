@@ -24,6 +24,10 @@ steps:
       testType: 'app'  # O 'container' si es un análisis de imágenes
       monitorWhen: 'always'
       failOnIssues: false  # Cambia a 'true' si quieres que el pipeline falle en caso de vulnerabilidades críticas
+      additionalArguments: '--json-file-output=snyk-report.json'
+
+  - script: ls -l
+    displayName: 'Verificar archivos generados'
 
   - task: PublishPipelineArtifact@1
     inputs:
