@@ -26,14 +26,16 @@ steps:
 
 
 
+
+
 - script: |
-    echo "📦 Eliminando versión Legacy de Snyk..."
-    npm uninstall -g snyk || echo "Snyk no estaba instalado"
-    echo "📦 Instalando la última versión de Snyk..."
-    npm install -g snyk@latest
-    snyk --version
-    snyk --help
-  displayName: '📦 Instalar la versión correcta de Snyk'
+    echo "📦 Descargando la última versión de Snyk CLI..."
+    curl -Lo snyk https://static.snyk.io/cli/latest/snyk-linux
+    chmod +x snyk
+    ./snyk --version
+    ./snyk --help
+  displayName: '📦 Descargar y verificar Snyk CLI'
+
 
 
 # 3️⃣ Autenticar con Snyk Web
@@ -44,10 +46,12 @@ steps:
 
 # 4️⃣ Ejecutar análisis de seguridad en código fuente
 
+
+
 - script: |
-    echo "🔍 Ejecutando Snyk Test con salida detallada..."
-    snyk test --debug || echo "⚠️ Error en Snyk Test"
-  displayName: '🔍 Verificar errores en Snyk Test'
+    echo "🔍 Ejecutando Snyk Test..."
+    ./snyk test --debug || echo "⚠️ Error en Snyk Test"
+  displayName: '🔍 Ejecutar Snyk Test'
 
 
 # 5️⃣ Ejecutar análisis de seguridad en dependencias (Python, Node.js, etc.)
