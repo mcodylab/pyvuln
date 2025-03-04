@@ -41,7 +41,7 @@ steps:
 # 3️⃣ Autenticar con Snyk Web
 - script: |
     echo "🔑 Autenticando Snyk..."
-    snyk auth $(SNYK_TOKEN)
+    ./snyk auth $(SNYK_TOKEN)
   displayName: '🔑 Autenticación en Snyk'
 
 # 4️⃣ Ejecutar análisis de seguridad en código fuente
