@@ -30,6 +30,7 @@ steps:
       npm install -g snyk  # Instala Snyk CLI
       snyk auth $(SNYK_TOKEN)  # Autentica con Snyk
       snyk test --json > $(Build.SourcesDirectory)/snyk-report.json
+      snyk test --json-file-output=$(Build.SourcesDirectory)/snyk-report.json
     displayName: 'Forzar salida JSON'
 
   - script: |
