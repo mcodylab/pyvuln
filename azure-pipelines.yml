@@ -34,10 +34,12 @@ steps:
   displayName: '🔑 Autenticación en Snyk'
 
 # 4️⃣ Ejecutar análisis de seguridad en código fuente
+
 - script: |
-    echo "🔍 Ejecutando Snyk Code Test..."
-    snyk code test --json > snyk-code-report.json || echo "⚠️ Snyk Code Test finalizó con errores"
-  displayName: '🔍 Ejecutar Snyk Code Test'
+    echo "🔍 Ejecutando Snyk Test con salida detallada..."
+    snyk test --debug || echo "⚠️ Error en Snyk Test"
+  displayName: '🔍 Verificar errores en Snyk Test'
+
 
 # 5️⃣ Ejecutar análisis de seguridad en dependencias (Python, Node.js, etc.)
 - script: |
