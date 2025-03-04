@@ -52,6 +52,8 @@ steps:
     echo "🔍 Ejecutando Snyk Test..."
     DEBUG=*snyk* ./snyk  --project-name="$(Build.Repository.Name)"  code test --command=python3 --file=requirements.txt --package-manager=pip  --debug  --org=4c1ee31d-3158-4a30-ae75-b754fa29b29f  || echo "⚠️ Error en Snyk Test"
   displayName: '🔍 Ejecutar Snyk Test'
+  env:
+    SNYK_TOKEN: $(SNYK_TOKEN) 
 
 
 # 7️⃣ Enviar resultados a Snyk Web
