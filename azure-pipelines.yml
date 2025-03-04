@@ -20,6 +20,10 @@ steps:
       snyk test --all-projects --severity-threshold=low --json > $(Build.ArtifactStagingDirectory)/snyk-report.json
       snyk monitor
     displayName: 'Forzar salida JSON'
+    
+  - script: |
+      snyk monitor
+    displayName: '📡 Enviar datos a Snyk Web'
 
   - task: SnykSecurityScan@1
     inputs:
