@@ -1,54 +1,79 @@
 trigger:
-- main  # Se ejecuta en cada cambio en main
-
-pr:
-- main  # También se ejecuta en cada Pull Request a main
+- main  # O el branch donde quieres ejecutarlo
 
 pool:
-  vmImage: 'ubuntu-latest'  # Máquina virtual para ejecutar el pipeline
+  vmImage: 'ubuntu-latest'
 
 variables:
-- group: varcody  # Grupo de variables con credenciales de JFrog
+  - group: varcody    # Contiene la variable SNYK_TOKEN
 
 steps:
 
-  - script: |
-      pip install --no-cache-dir --index-url https://pypi.org/simple --upgrade pip  # Actualiza pip
-      pip install --no-cache-dir --index-url https://pypi.org/simple  -r requirements.txt  # Instala dependencias
-      npm install -g snyk  # Instala Snyk CLI
-      snyk auth $(SNYK_TOKEN)  # Autentica con Snyk
-      snyk code test --debug || true
-      snyk container test --file=Dockerfile || true
-      snyk test --all-projects --severity-threshold=low || true
-      snyk test --all-projects --severity-threshold=low --json > $(Build.ArtifactStagingDirectory)/snyk-report.json
-      snyk monitor
-    displayName: 'Forzar salida JSON'
-    
-  - script: |
-      snyk monitor
-    displayName: '📡 Enviar datos a Snyk Web'
+# 1️⃣ Verifica el entorno del pipeline
+- script: |
+    echo "📂 Directorio actual:"
+    pwd
+    echo "📂 Archivos disponibles:"
+    ls -lhR $(Build.SourcesDirectory)
+  displayName: '📂 Verificar entorno antes de Snyk'
 
-  - task: SnykSecurityScan@1
-    inputs:
-      serviceConnectionEndpoint: 'snykcon'
-      testType: 'app'
-      monitorWhen: 'never'  # Deshabilita `snyk monitor` aquí para evitar el error
-      failOnIssues: false
+# 2️⃣ Instalar Snyk CLI si no está disponible
+- script: |
+    echo "🔍 Verificando instalación de Snyk..."
+    if ! command -v snyk &> /dev/null; then
+        echo "📦 Snyk no encontrado, instalando..."
+        npm install -g snyk
+    fi
+    snyk --version
+  displayName: '📦 Instalar Snyk CLI'
 
+# 3️⃣ Autenticar con Snyk Web
+- script: |
+    echo "🔑 Autenticando Snyk..."
+    snyk auth $(SNYK_TOKEN)
+  displayName: '🔑 Autenticación en Snyk'
 
-  
+# 4️⃣ Ejecutar análisis de seguridad en código fuente
+- script: |
+    echo "🔍 Ejecutando Snyk Code Test..."
+    snyk code test --json > snyk-code-report.json || echo "⚠️ Snyk Code Test finalizó con errores"
+  displayName: '🔍 Ejecutar Snyk Code Test'
 
+# 5️⃣ Ejecutar análisis de seguridad en dependencias (Python, Node.js, etc.)
+- script: |
+    echo "📦 Ejecutando análisis de dependencias..."
+    snyk test --json > snyk-deps-report.json || echo "⚠️ Snyk Test finalizó con errores"
+  displayName: '📦 Ejecutar Snyk Dependency Test'
 
-  - script: |
-      echo "📂 Listando archivos en $(Build.ArtifactStagingDirectory):"
-      ls -lh $(Build.ArtifactStagingDirectory)
+# 6️⃣ Ejecutar análisis de seguridad en Dockerfile (si aplica)
+- script: |
+    echo "🐳 Escaneando imagen Docker..."
+    snyk container test <tu-imagen>:latest --json > snyk-docker-report.json || echo "⚠️ Snyk Docker Test finalizó con errores"
+  displayName: '🐳 Ejecutar Snyk Docker Test'
+  condition: succeededOrFailed() # Evita fallar si no hay Docker
 
-      echo "📄 Mostrando contenido de snyk-report.json:"
-      cat $(Build.ArtifactStagingDirectory)/snyk-report.json || echo "⚠️ No se encontró snyk-report.json"
+# 7️⃣ Enviar resultados a Snyk Web
+- script: |
+    echo "📡 Enviando datos a Snyk Web..."
+    snyk monitor || echo "⚠️ Error al enviar datos a Snyk Web"
+  displayName: '📡 Enviar datos a Snyk Web'
 
-    displayName: '🔍 Verificar reporte JSON'
+# 8️⃣ Publicar reportes de Snyk en Azure DevOps
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Build.SourcesDirectory)/snyk-code-report.json'
+    artifactName: 'snyk-code-report'
+  displayName: '📄 Publicar Reporte Snyk Code'
 
-  - task: PublishPipelineArtifact@1
-    inputs:
-      targetPath: '$(Build.ArtifactStagingDirectory)/snyk-report.json'                                                                                                                                                                          
-      artifactName: 'snyk-security-report'
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Build.SourcesDirectory)/snyk-deps-report.json'
+    artifactName: 'snyk-deps-report'
+  displayName: '📄 Publicar Reporte Snyk Dependencies'
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Build.SourcesDirectory)/snyk-docker-report.json'
+    artifactName: 'snyk-docker-report'
+  displayName: '📄 Publicar Reporte Snyk Docker'
+  condition: succeededOrFailed() # Evita fallar si no hay Docker
