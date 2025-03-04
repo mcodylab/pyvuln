@@ -8,7 +8,7 @@ variables:
   - group: varcody    # Contiene la variable SNYK_TOKEN
 
 steps:
-
+- checkout: self 
 - script: |
     pip install --no-cache-dir --index-url https://pypi.org/simple --upgrade pip  # Actualiza pip
     pip install --no-cache-dir --index-url https://pypi.org/simple  -r requirements.txt  # Instala dependencias
@@ -50,14 +50,14 @@ steps:
 
 - script: |
     echo "🔍 Ejecutando Snyk Test..."
-    DEBUG=*snyk* ./snyk  code test --command=python3 --file=requirements.txt --package-manager=pip  --debug  --org=4c1ee31d-3158-4a30-ae75-b754fa29b29f  || echo "⚠️ Error en Snyk Test"
+    DEBUG=*snyk* ./snyk  --project-name="$(Build.Repository.Name)"  code test --command=python3 --file=requirements.txt --package-manager=pip  --debug  --org=4c1ee31d-3158-4a30-ae75-b754fa29b29f  || echo "⚠️ Error en Snyk Test"
   displayName: '🔍 Ejecutar Snyk Test'
 
 
 # 7️⃣ Enviar resultados a Snyk Web
 - script: |
     echo "📡 Enviando datos a Snyk Web..."
-     DEBUG=*snyk*  ./snyk monitor  --command=python3 --file=requirements.txt --package-manager=pip  --debug  --org=4c1ee31d-3158-4a30-ae75-b754fa29b29f || echo "⚠️ Error al enviar datos a Snyk Web"
+     DEBUG=*snyk*  ./snyk monitor --project-name="$(Build.Repository.Name)"  --command=python3 --file=requirements.txt --package-manager=pip  --debug  --org=4c1ee31d-3158-4a30-ae75-b754fa29b29f || echo "⚠️ Error al enviar datos a Snyk Web"
   displayName: '📡 Enviar datos a Snyk Web'
 
 # 8️⃣ Publicar reportes de Snyk en Azure DevOps
