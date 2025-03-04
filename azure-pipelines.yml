@@ -12,23 +12,22 @@ variables:
 
 steps:
 
-  - script: |
-    
-     pip install --no-cache-dir --index-url https://pypi.org/simple --upgrade pip  # Actualiza pip
-     pip install --no-cache-dir --index-url https://pypi.org/simple  -r requirements.txt  # Instala dependencias
-    displayName: 'Instalar dependencias'
-
   - task: SnykSecurityScan@1
     inputs:
       serviceConnectionEndpoint: 'snykcon'
       testType: 'app'
       monitorWhen: 'never'  # Deshabilita `snyk monitor` aquí para evitar el error
       failOnIssues: false
+
+
   
   - script: |
+      pip install --no-cache-dir --index-url https://pypi.org/simple --upgrade pip  # Actualiza pip
+      pip install --no-cache-dir --index-url https://pypi.org/simple  -r requirements.txt  # Instala dependencias
       npm install -g snyk  # Instala Snyk CLI
       snyk auth $(SNYK_TOKEN)  # Autentica con Snyk
       snyk test --json > $(Build.ArtifactStagingDirectory)/snyk-report.json
+      snyk monitor
     displayName: 'Forzar salida JSON'
 
   - script: |
