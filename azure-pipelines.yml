@@ -50,7 +50,7 @@ steps:
 
 - script: |
     echo "🔍 Ejecutando Snyk Test..."
-    ./snyk test --all-projects --severity-threshold=low || echo "⚠️ Error en Snyk Test"
+    ./snyk  code test --org=4c1ee31d-3158-4a30-ae75-b754fa29b29f || echo "⚠️ Error en Snyk Test"
   displayName: '🔍 Ejecutar Snyk Test'
 
 
