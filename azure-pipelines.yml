@@ -24,13 +24,16 @@ steps:
 
 # 2️⃣ Instalar Snyk CLI si no está disponible
 
+
+
 - script: |
-    echo "🔍 Verificando versión de Snyk..."
+    echo "📦 Eliminando versión Legacy de Snyk..."
     npm uninstall -g snyk || echo "Snyk no estaba instalado"
+    echo "📦 Instalando la última versión de Snyk..."
     npm install -g snyk@latest
     snyk --version
-    snyk help
-  displayName: '📦 Instalar y verificar Snyk CLI'
+    snyk --help
+  displayName: '📦 Instalar la versión correcta de Snyk'
 
 
 # 3️⃣ Autenticar con Snyk Web
