@@ -57,20 +57,20 @@ steps:
 # 5️⃣ Ejecutar análisis de seguridad en dependencias (Python, Node.js, etc.)
 - script: |
     echo "📦 Ejecutando análisis de dependencias..."
-    snyk test --json > snyk-deps-report.json || echo "⚠️ Snyk Test finalizó con errores"
+    ./snyk test --json > snyk-deps-report.json || echo "⚠️ Snyk Test finalizó con errores"
   displayName: '📦 Ejecutar Snyk Dependency Test'
 
 # 6️⃣ Ejecutar análisis de seguridad en Dockerfile (si aplica)
 - script: |
     echo "🐳 Escaneando imagen Docker..."
-    snyk container test <tu-imagen>:latest --json > snyk-docker-report.json || echo "⚠️ Snyk Docker Test finalizó con errores"
+    ./snyk container test <tu-imagen>:latest --json > snyk-docker-report.json || echo "⚠️ Snyk Docker Test finalizó con errores"
   displayName: '🐳 Ejecutar Snyk Docker Test'
   condition: succeededOrFailed() # Evita fallar si no hay Docker
 
 # 7️⃣ Enviar resultados a Snyk Web
 - script: |
     echo "📡 Enviando datos a Snyk Web..."
-    snyk monitor || echo "⚠️ Error al enviar datos a Snyk Web"
+    ./snyk monitor || echo "⚠️ Error al enviar datos a Snyk Web"
   displayName: '📡 Enviar datos a Snyk Web'
 
 # 8️⃣ Publicar reportes de Snyk en Azure DevOps
