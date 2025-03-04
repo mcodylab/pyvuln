@@ -9,6 +9,11 @@ variables:
 
 steps:
 
+- script: |
+    pip install --no-cache-dir --index-url https://pypi.org/simple --upgrade pip  # Actualiza pip
+    pip install --no-cache-dir --index-url https://pypi.org/simple  -r requirements.txt  # Instala dependencias
+  displayName: 'Instalar dependencias'
+
 # 1️⃣ Verifica el entorno del pipeline
 - script: |
     echo "📂 Directorio actual:"
