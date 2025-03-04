@@ -23,14 +23,15 @@ steps:
   displayName: '📂 Verificar entorno antes de Snyk'
 
 # 2️⃣ Instalar Snyk CLI si no está disponible
+
 - script: |
-    echo "🔍 Verificando instalación de Snyk..."
-    if ! command -v snyk &> /dev/null; then
-        echo "📦 Snyk no encontrado, instalando..."
-        npm install -g snyk
-    fi
+    echo "🔍 Verificando versión de Snyk..."
+    npm uninstall -g snyk || echo "Snyk no estaba instalado"
+    npm install -g snyk@latest
     snyk --version
-  displayName: '📦 Instalar Snyk CLI'
+    snyk help
+  displayName: '📦 Instalar y verificar Snyk CLI'
+
 
 # 3️⃣ Autenticar con Snyk Web
 - script: |
