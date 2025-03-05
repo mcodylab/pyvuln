@@ -27,11 +27,7 @@ steps:
 
 
 
-- task: SnykSecurityScan@1
-  inputs:
-    serviceConnectionEndpoint: 'snykcon'
-    testType: 'code'
-    failOnIssues: false
+
 
 
 
@@ -40,6 +36,22 @@ steps:
     echo "🔑 Autenticando Snyk..."
     snyk auth $(SNYK_TOKEN)
   displayName: '🔑 Autenticación en Snyk'
+
+
+# 4️⃣ Ejecutar análisis de seguridad en código fuente
+- script: |
+    echo "🔍 Ejecutando Snyk Test..."
+    snyk   test  --project-name="$(Build.Repository.Name)"|| echo "⚠️ Error en Snyk Test"
+  displayName: '🔍 Ejecutar Snyk Test'
+
+
+
+# 7️⃣ Enviar resultados a Snyk Web
+- script: |
+    echo "📡 Enviando datos a Snyk Web..."
+    snyk monitor --project-name="$(Build.Repository.Name)"  - || echo "⚠️ Error al enviar datos a Snyk Web"
+  displayName: '📡 Enviar datos a Snyk Web'
+ 
 
 
 
