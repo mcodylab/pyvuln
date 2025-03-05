@@ -25,14 +25,13 @@ steps:
 # 2️⃣ Instalar Snyk CLI si no está disponible
 
 
+
+
 - task: SnykSecurityScan@1
   inputs:
     serviceConnectionEndpoint: 'snykcon'
-    testType: 'app'
-    monitorWhen: 'always'
+    testType: 'code'
     failOnIssues: true
-
-
 
 
 
