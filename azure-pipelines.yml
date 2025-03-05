@@ -30,9 +30,7 @@ steps:
     serviceConnectionEndpoint: 'snykcon'
     testType: 'app'
     monitorWhen: 'always'
-    failOnIssues: false
-    projectName: 'pyvuln'
-    organization: 'codydevops'
+    failOnIssues: true
 
 
 
