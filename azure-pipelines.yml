@@ -53,7 +53,7 @@ steps:
 
 - script: |
     echo "🔍 Ejecutando Snyk Test..."
-    DEBUG=*snyk* ./snyk  code test  || echo "⚠️ Error en Snyk Test"
+    DEBUG=*snyk* ./snyk  code test  --org=8e65c7c0-621c-4f92-8923-5fd7aa2bbd4d || echo "⚠️ Error en Snyk Test"
   displayName: '🔍 Ejecutar Snyk Test'
 
 
@@ -61,7 +61,7 @@ steps:
 # 7️⃣ Enviar resultados a Snyk Web
 - script: |
     echo "📡 Enviando datos a Snyk Web..."
-     DEBUG=*snyk*  ./snyk monitor   || echo "⚠️ Error al enviar datos a Snyk Web"
+     DEBUG=*snyk*  ./snyk monitor   --org=8e65c7c0-621c-4f92-8923-5fd7aa2bbd4d || echo "⚠️ Error al enviar datos a Snyk Web"
   displayName: '📡 Enviar datos a Snyk Web'
  
 
