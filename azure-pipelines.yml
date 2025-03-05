@@ -2,7 +2,7 @@ trigger:
 - main  # O el branch donde quieres ejecutarlo
 
 pool:
-  vmImage: 'Agent'
+   name: 'Agent'
 
 variables:
   - group: varcody    # Contiene la variable SNYK_TOKEN
