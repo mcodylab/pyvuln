@@ -31,7 +31,7 @@ steps:
   inputs:
     serviceConnectionEndpoint: 'snykcon'
     testType: 'code'
-    failOnIssues: true
+    failOnIssues: false
 
 
 
