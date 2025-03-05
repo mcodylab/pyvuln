@@ -41,7 +41,9 @@ steps:
 # 4️⃣ Ejecutar análisis de seguridad en código fuente
 - script: |
     echo "🔍 Ejecutando Snyk Test..."
-    snyk   test  --project-name="$(Build.Repository.Name)"|| echo "⚠️ Error en Snyk Test"
+    snyk auth $(SNYK_TOKEN)
+    snyk   test  --file=requirements.txt   --project-name="$(Build.Repository.Name)"|| echo "⚠️ Error en Snyk Test"
+    snyk monitor --project-name="$(Build.Repository.Name)"  - || echo "⚠️ Error al enviar datos a Snyk Web"
   displayName: '🔍 Ejecutar Snyk Test'
 
 
