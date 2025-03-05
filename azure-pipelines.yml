@@ -50,7 +50,7 @@ steps:
 - script: |
     echo "🔍 Ejecutando Snyk Test..."
     snyk auth $(SNYK_TOKEN)
-    snyk   test    --project-name="$(Build.Repository.Name)" --json-file-output=snyk-code-report.json || echo "⚠️ Error en Snyk Test"
+    snyk   test    --project-name="$(Build.Repository.Name)" --json-file-output=$(Build.SourcesDirectory)/snyk-code-report.json  || echo "⚠️ Error en Snyk Test"
     snyk monitor --project-name="$(Build.Repository.Name)"  - || echo "⚠️ Error al enviar datos a Snyk Web"
   displayName: '🔍 Ejecutar Snyk Test'
 
