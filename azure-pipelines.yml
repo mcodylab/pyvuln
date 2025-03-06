@@ -53,52 +53,54 @@ steps:
     snyk monitor --project-name="$(Build.Repository.Name)" || echo "⚠️ Error al enviar datos a Snyk Web"
   displayName: '🔍 Ejecutar Snyk Test'
 
+
 # 2️⃣ Verificar que el JSON se generó correctamente
 - script: |
     echo "📂 Verificando que Snyk generó el reporte JSON..."
     ls -l $(Build.SourcesDirectory)
   displayName: "📂 Verificar archivos generados por Snyk"
 
-# 3️⃣ Mover el JSON a ArtifactStagingDirectory antes de publicarlo
+# 3️⃣ Mover JSON a ArtifactStagingDirectory
 - script: |
     echo "🚀 Moviendo JSON a ArtifactStagingDirectory..."
-    mv $(Build.SourcesDirectory)/snyk-code-report.json $(Build.ArtifactStagingDirectory)/snyk-code-report.json
-    ls -l $(Build.ArtifactStagingDirectory)
+    mv $(Build.SourcesDirectory)/snyk-code-report.json $(Build.ArtifactStagingDirectory)/
   displayName: "📂 Mover JSON a ArtifactStagingDirectory"
 
-# 4️⃣ Convertir JSON a HTML con formato
+# 4️⃣ Convertir JSON a Markdown para la pestaña Summary
 - script: |
-    echo "🔄 Convirtiendo JSON a HTML..."
-    echo "<html><head><title>Snyk Report</title><style>table {width: 100%; border-collapse: collapse;} th, td {border: 1px solid black; padding: 8px; text-align: left;} th {background-color: #f2f2f2;}</style></head><body><h1>Resultados de Análisis</h1><table><tr><th>ID</th><th>Severidad</th><th>Paquete</th><th>Vulnerabilidad</th><th>CVSS</th><th>Más Información</th></tr>" > $(Build.ArtifactStagingDirectory)/snyk-report.html
+    echo "🔄 Convirtiendo JSON a Markdown..."
+    echo "# Snyk Report" > $(Build.ArtifactStagingDirectory)/snyk-report.md
+    echo "### Vulnerabilidades Encontradas" >> $(Build.ArtifactStagingDirectory)/snyk-report.md
     cat $(Build.ArtifactStagingDirectory)/snyk-code-report.json | jq -r '
     .vulnerabilities[] | 
-    "<tr><td>\(.id)</td><td>\(.severity)</td><td>\(.moduleName)</td><td>\(.title)</td><td>\(.cvssScore)</td><td><a href=\"\(.references[0].url)\">Detalles</a></td></tr>"' >> $(Build.ArtifactStagingDirectory)/snyk-report.html
-    echo "</table></body></html>" >> $(Build.ArtifactStagingDirectory)/snyk-report.html
-  displayName: "🔄 Convertir JSON a HTML"
+    "#### \(.id)\n- **Severidad:** \(.severity)\n- **Paquete:** \(.moduleName)\n- **Vulnerabilidad:** \(.title)\n- **CVSS Score:** \(.cvssScore)\n- [Detalles](\(.references[0].url))\n"' >> $(Build.ArtifactStagingDirectory)/snyk-report.md
+  displayName: "🔄 Convertir JSON a Markdown"
 
-# 5️⃣ Verificar que los archivos se generaron en ArtifactStagingDirectory
-- script: |
-    echo "📂 Contenido de Build.ArtifactStagingDirectory después de conversión:"
-    ls -l $(Build.ArtifactStagingDirectory)
-  displayName: "📂 Verificar archivos en ArtifactStagingDirectory"
-
-# 6️⃣ Publicar el JSON y el HTML como artefactos
+# 5️⃣ Publicar Reporte Markdown en Summary
 - task: PublishPipelineArtifact@1
   inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)/snyk-code-report.json'
-    artifactName: 'snyk-json-report'
-  displayName: '📤 Publicar Reporte JSON de Snyk'
+    targetPath: '$(Build.ArtifactStagingDirectory)/snyk-report.md'
+    artifactName: 'snyk-markdown-report'
+  displayName: '📤 Publicar Reporte Markdown'
+
+# 6️⃣ Publicar Markdown como Summary
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo "## Snyk Report" > $(Build.ArtifactStagingDirectory)/snyk-summary.md
+      Get-Content -Path "$(Build.ArtifactStagingDirectory)/snyk-report.md" | Out-File -FilePath "$(Build.ArtifactStagingDirectory)/snyk-summary.md" -Append
+  displayName: "Generar Summary"
+  condition: succeeded()
 
 - task: PublishPipelineArtifact@1
   inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)/snyk-report.html'
-    artifactName: 'snyk-html-report'
-  displayName: '📤 Publicar Reporte HTML de Snyk'
+    targetPath: '$(Build.ArtifactStagingDirectory)/snyk-summary.md'
+    artifactName: 'snyk-summary'
+  displayName: '📤 Publicar Summary'
 
-# 7️⃣ Intentar mostrar el reporte en la pestaña de Code Coverage
-- task: PublishCodeCoverageResults@1
+- task: PublishBuildArtifacts@1
   inputs:
-    codeCoverageTool: 'Cobertura'
-    summaryFileLocation: '$(Build.ArtifactStagingDirectory)/snyk-report.html'
-    reportDirectory: '$(Build.ArtifactStagingDirectory)/'
-  displayName: '📤 Publicar Reporte como Code Coverage'
+    targetPath: '$(Build.ArtifactStagingDirectory)'
+    artifactName: 'snyk-reports'
+  displayName: 'Publicar todos los reportes'
