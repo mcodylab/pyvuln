@@ -45,62 +45,40 @@ steps:
     snyk auth $(SNYK_TOKEN)
   displayName: '🔑 Autenticación en Snyk'
 
+
 # 4️⃣ Ejecutar análisis de seguridad en código fuente
 - script: |
     echo "🔍 Ejecutando Snyk Test..."
     snyk auth $(SNYK_TOKEN)
-    snyk test --project-name="$(Build.Repository.Name)" --json-file-output=$(Build.SourcesDirectory)/snyk-code-report.json || echo "⚠️ Error en Snyk Test"
-    snyk monitor --project-name="$(Build.Repository.Name)" || echo "⚠️ Error al enviar datos a Snyk Web"
+    snyk   test    --project-name="$(Build.Repository.Name)" --json-file-output=$(Build.SourcesDirectory)/snyk-code-report.json  || echo "⚠️ Error en Snyk Test"
+    snyk monitor --project-name="$(Build.Repository.Name)"   || echo "⚠️ Error al enviar datos a Snyk Web"
   displayName: '🔍 Ejecutar Snyk Test'
 
 
-# 2️⃣ Verificar que el JSON se generó correctamente
-- script: |
-    echo "📂 Verificando que Snyk generó el reporte JSON..."
-    ls -l $(Build.SourcesDirectory)
-  displayName: "📂 Verificar archivos generados por Snyk"
 
-# 3️⃣ Mover JSON a ArtifactStagingDirectory
+# 7️⃣ Enviar resultados a Snyk Web
 - script: |
-    echo "🚀 Moviendo JSON a ArtifactStagingDirectory..."
-    mv $(Build.SourcesDirectory)/snyk-code-report.json $(Build.ArtifactStagingDirectory)/
-  displayName: "📂 Mover JSON a ArtifactStagingDirectory"
-
-# 4️⃣ Convertir JSON a Markdown para la pestaña Summary
-- script: |
-    echo "🔄 Convirtiendo JSON a Markdown..."
-    echo "# Snyk Report" > $(Build.ArtifactStagingDirectory)/snyk-report.md
-    echo "### Vulnerabilidades Encontradas" >> $(Build.ArtifactStagingDirectory)/snyk-report.md
-    cat $(Build.ArtifactStagingDirectory)/snyk-code-report.json | jq -r '
-    .vulnerabilities[] | 
-    "#### \(.id)\n- **Severidad:** \(.severity)\n- **Paquete:** \(.moduleName)\n- **Vulnerabilidad:** \(.title)\n- **CVSS Score:** \(.cvssScore)\n- [Detalles](\(.references[0].url))\n"' >> $(Build.ArtifactStagingDirectory)/snyk-report.md
-  displayName: "🔄 Convertir JSON a Markdown"
-
-# 5️⃣ Publicar Reporte Markdown en Summary
+    echo "📡 Enviando datos a Snyk Web..."
+    snyk monitor --project-name="$(Build.Repository.Name)"   || echo "⚠️ Error al enviar datos a Snyk Web"
+  displayName: '📡 Enviar datos a Snyk Web'
+# 8️⃣ Publicar reportes de Snyk en Azure DevOps
 - task: PublishPipelineArtifact@1
   inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)/snyk-report.md'
-    artifactName: 'snyk-markdown-report'
-  displayName: '📤 Publicar Reporte Markdown'
+    targetPath: '$(Build.SourcesDirectory)/snyk-code-report.json'
+    artifactName: 'snyk-code-report'
+  displayName: '📄 Publicar Reporte Snyk Code'
+ 
+- script: |
+    cat snyk-code-report.json | jq '.' > snyk-code-report.html
+  displayName: "Convertir JSON a HTML"
 
-# 6️⃣ Publicar Markdown como Summary
-- task: PowerShell@2
-  inputs:
-    targetType: 'inline'
-    script: |
-      echo "## Snyk Report" > $(Build.ArtifactStagingDirectory)/snyk-summary.md
-      Get-Content -Path "$(Build.ArtifactStagingDirectory)/snyk-report.md" | Out-File -FilePath "$(Build.ArtifactStagingDirectory)/snyk-summary.md" -Append
-  displayName: "Generar Summary"
-  condition: succeeded()
+- script: ls -l $(Build.SourcesDirectory)
+  displayName: "Verificar archivos generados"
 
-- task: PublishPipelineArtifact@1
-  inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)/snyk-summary.md'
-    artifactName: 'snyk-summary'
-  displayName: '📤 Publicar Summary'
+- script: mv $(Build.SourcesDirectory)/snyk-code-report.json $(Build.ArtifactStagingDirectory)/
+  displayName: "Mover archivo a ArtifactStagingDirectory"
 
 - task: PublishBuildArtifacts@1
   inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)'
-    artifactName: 'snyk-reports'
-  displayName: 'Publicar todos los reportes'
+    targetPath: '$(Build.ArtifactStagingDirectory)/snyk-code-report.json'
+    artifactName: 'snyk-report'
