@@ -54,31 +54,48 @@ steps:
     snyk monitor --project-name="$(Build.Repository.Name)"   || echo "⚠️ Error al enviar datos a Snyk Web"
   displayName: '🔍 Ejecutar Snyk Test'
 
-
+# 🔹 Verificar que el archivo JSON tiene datos
+- script: |
+    if [ ! -s "$(Build.SourcesDirectory)/snyk-code-report.json" ]; then
+      echo "⚠️ El archivo JSON de Snyk está vacío o no se generó correctamente."
+      exit 1
+    fi
+    echo "✅ Reporte de Snyk generado correctamente:"
+    cat $(Build.SourcesDirectory)/snyk-code-report.json
+  displayName: '📄 Verificar contenido del reporte Snyk'
 
 # 7️⃣ Enviar resultados a Snyk Web
 - script: |
     echo "📡 Enviando datos a Snyk Web..."
     snyk monitor --project-name="$(Build.Repository.Name)"   || echo "⚠️ Error al enviar datos a Snyk Web"
   displayName: '📡 Enviar datos a Snyk Web'
-# 8️⃣ Publicar reportes de Snyk en Azure DevOps
+
+# 🔹 Publicar reportes de Snyk en Azure DevOps
 - task: PublishPipelineArtifact@1
   inputs:
     targetPath: '$(Build.SourcesDirectory)/snyk-code-report.json'
     artifactName: 'snyk-code-report'
   displayName: '📄 Publicar Reporte Snyk Code'
- 
+
+# 🔹 Convertir JSON a HTML (Opcional)
 - script: |
-    cat snyk-code-report.json | jq '.' > snyk-code-report.html
-  displayName: "Convertir JSON a HTML"
+    cat $(Build.SourcesDirectory)/snyk-code-report.json | jq '.' > $(Build.SourcesDirectory)/snyk-code-report.html
+  displayName: "📄 Convertir JSON a HTML"
 
-- script: ls -l $(Build.SourcesDirectory)
-  displayName: "Verificar archivos generados"
+# 🔹 Verificar archivos generados
+- script: |
+    echo "📂 Archivos generados en el directorio:"
+    ls -lh $(Build.SourcesDirectory)
+  displayName: "📂 Verificar archivos generados"
 
-- script: mv $(Build.SourcesDirectory)/snyk-code-report.json $(Build.ArtifactStagingDirectory)/
-  displayName: "Mover archivo a ArtifactStagingDirectory"
+# 🔹 Mover el archivo JSON a ArtifactStagingDirectory
+- script: |
+    mv $(Build.SourcesDirectory)/snyk-code-report.json $(Build.ArtifactStagingDirectory)/
+  displayName: "📂 Mover archivo JSON a ArtifactStagingDirectory"
 
+# 🔹 Publicar artefactos en Azure DevOps
 - task: PublishBuildArtifacts@1
   inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)/snyk-code-report.json'
+    path: '$(Build.ArtifactStagingDirectory)/snyk-code-report.json'
     artifactName: 'snyk-report'
+  displayName: '📄 Publicar Reporte Snyk en Artefactos'
