@@ -78,15 +78,25 @@ steps:
     mv $(Build.SourcesDirectory)/snyk-code-report.json $(Build.ArtifactStagingDirectory)/
   displayName: "Mover archivo a ArtifactStagingDirectory"
 
+# 📄 Convertir JSON a HTML
+- script: |
+    echo "🔄 Convirtiendo JSON a HTML..."
+    cat $(Build.ArtifactStagingDirectory)/snyk-code-report.json | jq -r '
+    "<html><head><title>Snyk Report</title></head><body><h1>Resultados de Análisis</h1><pre>" + 
+    (tostring) + 
+    "</pre></body></html>"' > $(Build.ArtifactStagingDirectory)/snyk-report.html
+  displayName: "Convertir JSON a HTML"
+
+
 # 📂 Verificar archivos en ArtifactStagingDirectory
 - script: |
     echo "📂 Contenido de ArtifactStagingDirectory:"
     ls -l $(Build.ArtifactStagingDirectory)
   displayName: "Verificar archivos en ArtifactStagingDirectory"
 
-# 🔼 Publicar los artefactos en Azure DevOps
+# 📤 Publicar Reporte HTML
 - task: PublishBuildArtifacts@1
   inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)'
-    artifactName: 'snyk-report'
-  displayName: '📤 Publicar Reporte Final de Snyk'
+    targetPath: '$(Build.ArtifactStagingDirectory)/snyk-report.html'
+    artifactName: 'snyk-html-report'
+  displayName: '📤 Publicar Reporte HTML de Snyk'
