@@ -78,26 +78,26 @@ steps:
     mv $(Build.SourcesDirectory)/snyk-code-report.json $(Build.ArtifactStagingDirectory)/
   displayName: "Mover archivo a ArtifactStagingDirectory"
 
-# 📄 Convertir JSON a HTML con tabla
+# 📄 Convertir JSON a HTML con formato correcto
 - script: |
-    echo "🔄 Convirtiendo JSON a HTML con formato..."
-    echo "<html><head><title>Snyk Report</title></head><body><h1>Resultados de Análisis</h1><table border='1'><tr><th>ID</th><th>Severidad</th><th>Paquete</th><th>Vulnerabilidad</th><th>CVSS</th><th>Más Información</th></tr>" > $(Build.ArtifactStagingDirectory)/snyk-report.html
-    cat $(Build.ArtifactStagingDirectory)/snyk-code-report.json | jq -r '
+    echo "🔄 Convirtiendo JSON a HTML con formato correcto..."
+    echo "<html><head><title>Snyk Report</title><style>table {width: 100%; border-collapse: collapse;} th, td {border: 1px solid black; padding: 8px; text-align: left;} th {background-color: #f2f2f2;}</style></head><body><h1>Resultados de Análisis</h1><table><tr><th>ID</th><th>Severidad</th><th>Paquete</th><th>Vulnerabilidad</th><th>CVSS</th><th>Más Información</th></tr>" > $(Build.SourcesDirectory)/snyk-report.html
+    cat $(Build.SourcesDirectory)/snyk-code-report.json | jq -r '
     .vulnerabilities[] | 
-    "<tr><td>\(.id)</td><td>\(.severity)</td><td>\(.moduleName)</td><td>\(.title)</td><td>\(.cvssScore)</td><td><a href=\"\(.references[0].url)\">Detalles</a></td></tr>"' >> $(Build.ArtifactStagingDirectory)/snyk-report.html
-    echo "</table></body></html>" >> $(Build.ArtifactStagingDirectory)/snyk-report.html
+    "<tr><td>\(.id)</td><td>\(.severity)</td><td>\(.moduleName)</td><td>\(.title)</td><td>\(.cvssScore)</td><td><a href=\"\(.references[0].url)\">Detalles</a></td></tr>"' >> $(Build.SourcesDirectory)/snyk-report.html
+    echo "</table></body></html>" >> $(Build.SourcesDirectory)/snyk-report.html
   displayName: "Convertir JSON a HTML"
 
 
-# 📂 Verificar archivos en ArtifactStagingDirectory
+# 📂 Verificar archivos en Build.SourcesDirectory
 - script: |
-    echo "📂 Contenido de ArtifactStagingDirectory:"
-    ls -l $(Build.ArtifactStagingDirectory)
-  displayName: "Verificar archivos en ArtifactStagingDirectory"
+    echo "📂 Contenido de Build.SourcesDirectory después de conversión:"
+    ls -l $(Build.SourcesDirectory)
+  displayName: "Verificar archivos en Build.SourcesDirectory"
 
-# 📤 Publicar Reporte HTML
-- task: PublishBuildArtifacts@1
+# 📤 Publicar Reporte HTML para que aparezca en la pestaña de pruebas
+- task: PublishTestResults@2
   inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)/snyk-report.html'
-    artifactName: 'snyk-html-report'
-  displayName: '📤 Publicar Reporte HTML de Snyk'
+    testResultsFiles: '$(Build.SourcesDirectory)/snyk-report.html'
+    testRunTitle: 'Snyk Security Report'
+  displayName: '📤 Publicar Reporte de Seguridad en la pestaña de Test Results'
