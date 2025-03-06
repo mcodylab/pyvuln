@@ -78,13 +78,14 @@ steps:
     mv $(Build.SourcesDirectory)/snyk-code-report.json $(Build.ArtifactStagingDirectory)/
   displayName: "Mover archivo a ArtifactStagingDirectory"
 
-# 📄 Convertir JSON a HTML
+# 📄 Convertir JSON a HTML con tabla
 - script: |
-    echo "🔄 Convirtiendo JSON a HTML..."
+    echo "🔄 Convirtiendo JSON a HTML con formato..."
+    echo "<html><head><title>Snyk Report</title></head><body><h1>Resultados de Análisis</h1><table border='1'><tr><th>ID</th><th>Severidad</th><th>Paquete</th><th>Vulnerabilidad</th><th>CVSS</th><th>Más Información</th></tr>" > $(Build.ArtifactStagingDirectory)/snyk-report.html
     cat $(Build.ArtifactStagingDirectory)/snyk-code-report.json | jq -r '
-    "<html><head><title>Snyk Report</title></head><body><h1>Resultados de Análisis</h1><pre>" + 
-    (tostring) + 
-    "</pre></body></html>"' > $(Build.ArtifactStagingDirectory)/snyk-report.html
+    .vulnerabilities[] | 
+    "<tr><td>\(.id)</td><td>\(.severity)</td><td>\(.moduleName)</td><td>\(.title)</td><td>\(.cvssScore)</td><td><a href=\"\(.references[0].url)\">Detalles</a></td></tr>"' >> $(Build.ArtifactStagingDirectory)/snyk-report.html
+    echo "</table></body></html>" >> $(Build.ArtifactStagingDirectory)/snyk-report.html
   displayName: "Convertir JSON a HTML"
 
 
