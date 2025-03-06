@@ -72,6 +72,9 @@ steps:
     cat snyk-code-report.json | jq '.' > snyk-code-report.html
   displayName: "Convertir JSON a HTML"
 
+- script: ls -l $(Build.SourcesDirectory)
+  displayName: "Verificar archivos generados"
+
 - task: PublishBuildArtifacts@1
   inputs:
     targetPath: '$(Build.SourcesDirectory)/snyk-code-report.html'
