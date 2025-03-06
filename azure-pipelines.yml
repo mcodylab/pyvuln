@@ -75,9 +75,15 @@ steps:
 - script: ls -l $(Build.SourcesDirectory)
   displayName: "Verificar archivos generados"
 
+- script: mv $(Build.SourcesDirectory)/snyk-code-report.json $(Build.ArtifactStagingDirectory)/
+  displayName: "Mover archivo a ArtifactStagingDirectory"
+
 - task: PublishBuildArtifacts@1
   inputs:
-    targetPath: '$(Build.SourcesDirectory)/snyk-code-report.html'
-    artifactName: snyk-report
+    targetPath: '$(Build.ArtifactStagingDirectory)/snyk-code-report.json'
+    artifactName: 'snyk-report'
+
+
+
 
 
