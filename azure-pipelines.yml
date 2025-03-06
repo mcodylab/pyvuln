@@ -68,7 +68,7 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-    targetPath: snyk-code-report.html
+    targetPath: '$(Build.SourcesDirectory)/snyk-code-report.html'
     artifactName: snyk-report
 # 8️⃣ Publicar reportes de Snyk en Azure DevOps
 - task: PublishPipelineArtifact@1
