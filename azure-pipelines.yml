@@ -59,34 +59,11 @@ steps:
     snyk monitor --project-name="$(Build.Repository.Name)" || echo "⚠️ Error al enviar datos a Snyk Web"
   displayName: '📡 Enviar datos a Snyk Web'
 
-# 8️⃣ Verificar que el reporte se generó correctamente
-- script: |
-    echo "📂 Verificando contenido del reporte..."
-    cat $(Build.SourcesDirectory)/snyk-code-report.json || echo "⚠️ Reporte vacío o no encontrado"
-  displayName: "Verificar contenido del reporte"
 
-# 9️⃣ Publicar reportes de Snyk en Azure DevOps
-- task: PublishPipelineArtifact@1
-  inputs:
-    targetPath: '$(Build.SourcesDirectory)/snyk-code-report.json'
-    artifactName: 'snyk-code-report'
-  displayName: '📄 Publicar Reporte Snyk Code'
 
-# 🔄 Mover archivo a la carpeta de artefactos
-- script: |
-    echo "📦 Moviendo archivo a ArtifactStagingDirectory..."
-    mv $(Build.SourcesDirectory)/snyk-code-report.json $(Build.ArtifactStagingDirectory)/
-  displayName: "Mover archivo a ArtifactStagingDirectory"
 
-# 📄 Convertir JSON a HTML con formato correcto
-- script: |
-    echo "🔄 Convirtiendo JSON a HTML con formato correcto..."
-    echo "<html><head><title>Snyk Report</title><style>table {width: 100%; border-collapse: collapse;} th, td {border: 1px solid black; padding: 8px; text-align: left;} th {background-color: #f2f2f2;}</style></head><body><h1>Resultados de Análisis</h1><table><tr><th>ID</th><th>Severidad</th><th>Paquete</th><th>Vulnerabilidad</th><th>CVSS</th><th>Más Información</th></tr>" > $(Build.SourcesDirectory)/snyk-report.html
-    cat $(Build.SourcesDirectory)/snyk-code-report.json | jq -r '
-    .vulnerabilities[] | 
-    "<tr><td>\(.id)</td><td>\(.severity)</td><td>\(.moduleName)</td><td>\(.title)</td><td>\(.cvssScore)</td><td><a href=\"\(.references[0].url)\">Detalles</a></td></tr>"' >> $(Build.SourcesDirectory)/snyk-report.html
-    echo "</table></body></html>" >> $(Build.SourcesDirectory)/snyk-report.html
-  displayName: "Convertir JSON a HTML"
+
+
 
 
 # 📂 Verificar archivos en Build.SourcesDirectory
@@ -95,9 +72,40 @@ steps:
     ls -l $(Build.SourcesDirectory)
   displayName: "Verificar archivos en Build.SourcesDirectory"
 
-# 📤 Publicar Reporte HTML para que aparezca en la pestaña de pruebas
-- task: PublishTestResults@2
+
+# 3️⃣ Convertir JSON a HTML con formato
+- script: |
+    echo "🔄 Convirtiendo JSON a HTML..."
+    echo "<html><head><title>Snyk Report</title><style>table {width: 100%; border-collapse: collapse;} th, td {border: 1px solid black; padding: 8px; text-align: left;} th {background-color: #f2f2f2;}</style></head><body><h1>Resultados de Análisis</h1><table><tr><th>ID</th><th>Severidad</th><th>Paquete</th><th>Vulnerabilidad</th><th>CVSS</th><th>Más Información</th></tr>" > $(Build.ArtifactStagingDirectory)/snyk-report.html
+    cat $(Build.SourcesDirectory)/snyk-code-report.json | jq -r '
+    .vulnerabilities[] | 
+    "<tr><td>\(.id)</td><td>\(.severity)</td><td>\(.moduleName)</td><td>\(.title)</td><td>\(.cvssScore)</td><td><a href=\"\(.references[0].url)\">Detalles</a></td></tr>"' >> $(Build.ArtifactStagingDirectory)/snyk-report.html
+    echo "</table></body></html>" >> $(Build.ArtifactStagingDirectory)/snyk-report.html
+  displayName: "🔄 Convertir JSON a HTML"
+
+# 4️⃣ Verificar que los archivos se generaron en ArtifactStagingDirectory
+- script: |
+    echo "📂 Contenido de Build.ArtifactStagingDirectory después de conversión:"
+    ls -l $(Build.ArtifactStagingDirectory)
+  displayName: "📂 Verificar archivos en ArtifactStagingDirectory"
+
+# 5️⃣ Publicar el JSON y el HTML como artefactos
+- task: PublishPipelineArtifact@1
   inputs:
-    testResultsFiles: '$(Build.SourcesDirectory)/snyk-report.html'
-    testRunTitle: 'Snyk Security Report'
-  displayName: '📤 Publicar Reporte de Seguridad en la pestaña de Test Results'
+    targetPath: '$(Build.ArtifactStagingDirectory)/snyk-code-report.json'
+    artifactName: 'snyk-json-report'
+  displayName: '📤 Publicar Reporte JSON de Snyk'
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)/snyk-report.html'
+    artifactName: 'snyk-html-report'
+  displayName: '📤 Publicar Reporte HTML de Snyk'
+
+# 6️⃣ Intentar mostrar el reporte en la pestaña de Code Coverage
+- task: PublishCodeCoverageResults@1
+  inputs:
+    codeCoverageTool: 'Cobertura'
+    summaryFileLocation: '$(Build.ArtifactStagingDirectory)/snyk-report.html'
+    reportDirectory: '$(Build.ArtifactStagingDirectory)/'
+  displayName: '📤 Publicar Reporte como Code Coverage'
