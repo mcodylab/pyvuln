@@ -61,6 +61,12 @@ steps:
     echo "📡 Enviando datos a Snyk Web..."
     snyk monitor --project-name="$(Build.Repository.Name)"  - || echo "⚠️ Error al enviar datos a Snyk Web"
   displayName: '📡 Enviar datos a Snyk Web'
+# 8️⃣ Publicar reportes de Snyk en Azure DevOps
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Build.SourcesDirectory)/snyk-code-report.json'
+    artifactName: 'snyk-code-report'
+  displayName: '📄 Publicar Reporte Snyk Code'
  
 - script: |
     cat snyk-code-report.json | jq '.' > snyk-code-report.html
@@ -70,10 +76,5 @@ steps:
   inputs:
     targetPath: '$(Build.SourcesDirectory)/snyk-code-report.html'
     artifactName: snyk-report
-# 8️⃣ Publicar reportes de Snyk en Azure DevOps
-- task: PublishPipelineArtifact@1
-  inputs:
-    targetPath: '$(Build.SourcesDirectory)/snyk-code-report.json'
-    artifactName: 'snyk-code-report'
-  displayName: '📄 Publicar Reporte Snyk Code'
+
 
