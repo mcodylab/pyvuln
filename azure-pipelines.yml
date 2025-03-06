@@ -71,16 +71,3 @@ steps:
     targetPath: '$(Build.SourcesDirectory)/snyk-code-report.json'
     artifactName: 'snyk-code-report'
   displayName: '📄 Publicar Reporte Snyk Code'
-
-- task: PublishPipelineArtifact@1
-  inputs:
-    targetPath: '$(Build.SourcesDirectory)/snyk-deps-report.json'
-    artifactName: 'snyk-deps-report'
-  displayName: '📄 Publicar Reporte Snyk Dependencies'
-
-- task: PublishPipelineArtifact@1
-  inputs:
-    targetPath: '$(Build.SourcesDirectory)/snyk-docker-report.json'
-    artifactName: 'snyk-docker-report'
-  displayName: '📄 Publicar Reporte Snyk Docker'
-  condition: succeededOrFailed() # Evita fallar si no hay Docker
